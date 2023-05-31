@@ -1,30 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="css/style.css">
-	<title>Puissance 4</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Puissance 4</title>
 </head>
 <body>
-	<div id="app">
-		<form id="boardSize">
-			<label for="row">Rangées</label>
-            <input type="number" id="row" min="4" max="20" value="6">
-            <label for="column">Colonnes</label>
-            <input type="number" id="column" min="4" max="20" value="7">
-            <button type="button" id="playButton">Jouer !</button>
-        </form>
-	</div>
 </body>
-<script src="models/connect4.js"></script>
+<script src="models/ConnectFour.js"></script>
 <script src="models/Board.js"></script>
 <script>
-	document.getElementById('playButton').addEventListener('click', function() {
-		var rows = document.getElementById('row').value;
-		var columns = document.getElementById('column').value;
-		start(rows, columns);
-	});
+	// Initialize the ConnectFour game
+	const game = new ConnectFour();
 </script>
 </html>

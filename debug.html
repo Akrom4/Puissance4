@@ -12,3 +12,37 @@
   <div class="emptySquare"></div>
   <div class="emptySquare"></div>
 </div>
+/* winCondition */
+
+ 
+checkWinCondition() {
+  const lines = [
+      [[-1, -1], [1, 1]], // diagonal 
+      [[-1, 0], [1, 0]],  // horizontal 
+      [[0, -1], [0, 1]],  // vertical 
+      [[-1, 1], [1, -1]]  // diagonal 
+  ];
+
+  for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.columns; x++) {
+          for (let [dx, dy] of lines) {
+              let count = 0;
+              for (let i = -3; i <= 3; i++) {
+                  let nx = x + i * dx;
+                  let ny = y + i * dy;
+                  if (nx >= 0 && nx < this.columns && ny >= 0 && ny < this.rows && this.position[nx][ny] === this.turn) {
+                      count++;
+                      if (count === 4) {
+                          return true; // four in a row, we have a winner!
+                      }
+                  } else {
+                      count = 0;
+                  }
+              }
+          }
+      }
+  }
+
+  return false; // no winner
+} 
+
