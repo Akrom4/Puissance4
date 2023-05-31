@@ -141,8 +141,7 @@ body {
 	letter-spacing: 0.2vh;
   }
 
-  /* Level container */
-
+/* Level container */
 #levelContainer {
 	display: flex;
 	flex-direction: column;

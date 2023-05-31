@@ -64,7 +64,7 @@ class ConnectFour {
         });
     }
     
-    /* Launch the game */
+    /* Initialize and launch the game */
     start(rows, columns, audio, mode, level) {
         let squareSize = Math.min(window.innerWidth / columns, window.innerHeight / rows) * 0.7;
         document.documentElement.style.setProperty("--square-size", `${squareSize}px`);
@@ -80,7 +80,7 @@ class ConnectFour {
         this.render();
         this.board.addMouseOverEvents();
     }
-
+    /* Render the board in the DOM */
     render() {
         document.getElementById("app").innerHTML += this.board.toHTML();
     }   

@@ -9,7 +9,7 @@ class Board {
   audio;
   moveSound;
 
-  constructor(rows, columns, audio = true, level = "0",turn = "Y") {
+  constructor(rows, columns, audio = true, level = "0", turn = "Y") {
     this.rows = rows;
     this.columns = columns;
     this.winCondition = this.setWinCondition(this.columns, this.rows);
@@ -19,7 +19,6 @@ class Board {
       this.loadSound();
     }
     this.level = level;
-    
 
     for (let i = 0; i < this.columns; i++) {
       const column = [];
@@ -33,10 +32,10 @@ class Board {
   }
 
   loadSound() {
-    this.moveSound = new Audio('audio/move-sound.mp3');
-    this.moveSound.onerror = function() {
-      console.log('Error loading audio file');
-    }
+    this.moveSound = new Audio("audio/move-sound.mp3");
+    this.moveSound.onerror = function () {
+      console.log("Error loading audio file");
+    };
   }
 
   /* Try to play a move */
@@ -61,11 +60,10 @@ class Board {
         this.turn = this.turn === "Y" ? "R" : "Y";
         // this.audio ? this.moveSound.play() : null;
         if (this.audio) {
-          this.moveSound.play().catch(function(error) {
-              console.log('Error playing audio file');
+          this.moveSound.play().catch(function (error) {
+            console.log("Error playing audio file");
           });
-      }
-      
+        }
         // Redraw the board
         document.getElementById("app").innerHTML = this.toHTML();
         this.addMouseOverEvents();
@@ -118,7 +116,6 @@ class Board {
   }
 
   /* Add mouse events to the board */
-
   handleMouseOver(column) {
     const currentPlayer = this.getTurn();
     const upperSquare = column.getElementsByClassName("upperSquare")[0];
