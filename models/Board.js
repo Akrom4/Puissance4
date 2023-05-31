@@ -9,7 +9,7 @@ class Board {
   audio;
   moveSound;
 
-  constructor(rows, columns, audio = true, turn = "Y") {
+  constructor(rows, columns, audio = true, level = "0",turn = "Y") {
     this.rows = rows;
     this.columns = columns;
     this.winCondition = this.setWinCondition(this.columns, this.rows);
@@ -18,6 +18,7 @@ class Board {
     if (this.audio) {
       this.loadSound();
     }
+    this.level = level;
     
 
     for (let i = 0; i < this.columns; i++) {
