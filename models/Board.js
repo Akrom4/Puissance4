@@ -4,7 +4,7 @@ class Board {
   rows;
   columns;
   position;
-  turn; // Y for Yellow player || R for Red player
+  turn; // Y for Yellow player || R for Red player (used to know whose turn it is and token color placement)
   winCondition;
   audio;
   moveSound;
@@ -51,21 +51,31 @@ class Board {
       column[emptySlotIndex] = this.turn;
 
       // Check for a win condition
-      if (this.checkWinCondition(colNum, emptySlotIndex)) {
-        console.log("Player " + this.turn + " wins!");
+      const winningSequence = this.checkWinCondition(colNum, emptySlotIndex);
+      if (winningSequence) {
+        console.log("Player " + this.turn + " wins !");
         // Stop the game by redrawing the board without the eventlisteners
-        document.getElementById("app").innerHTML = this.toHTML();
+        document.getElementById("gameBoard").innerHTML = this.toHTML();
+
+        // Add arrow to winning sequence
+        winningSequence.forEach(([x, y]) => {
+          let square = document.querySelector(
+            `.column${x} .square:nth-child(${y + 1})`
+          );
+          let div = document.createElement("div");
+          div.classList.add("cross");
+          square.appendChild(div);
+        });
       } else {
         // Switch the turn to the other player
         this.turn = this.turn === "Y" ? "R" : "Y";
-        // this.audio ? this.moveSound.play() : null;
         if (this.audio) {
           this.moveSound.play().catch(function (error) {
             console.log("Error playing audio file");
           });
         }
-        // Redraw the board
-        document.getElementById("app").innerHTML = this.toHTML();
+        // Draw the board with new position
+        document.getElementById("gameBoard").innerHTML = this.toHTML();
         this.addMouseOverEvents();
       }
     }
@@ -75,14 +85,15 @@ class Board {
 
   checkWinCondition(colNum, rowNum) {
     const directions = [
-      [-1, 0], // horizontal -
-      [0, -1], // vertical   |
-      [-1, -1], // diagonal  \
-      [-1, 1], // diagonal   /
+      [-1, 0], // horizontal
+      [0, -1], // vertical
+      [-1, -1], // diagonal ↘
+      [-1, 1], // diagonal ↗
     ];
 
     for (let [dx, dy] of directions) {
       let count = 0;
+      let winningSequence = [];
       for (
         let offset = -this.winCondition - 1;
         offset <= this.winCondition + 1;
@@ -98,11 +109,13 @@ class Board {
           this.position[nx][ny] === this.turn
         ) {
           count++;
+          winningSequence.push([nx, ny]);
           if (count === this.winCondition) {
-            return true; // we have a winner!
+            return winningSequence; // return the winning sequence
           }
         } else {
           count = 0;
+          winningSequence = []; // reset the sequence when the chain is broken
         }
       }
     }
@@ -136,7 +149,7 @@ class Board {
   }
 
   addMouseOverEvents() {
-    const columns = document.getElementsByClassName("column");
+    const columns = document.getElementById("gameBoard").getElementsByClassName("column");
 
     for (let i = 0; i < columns.length; i++) {
       const column = columns[i];
@@ -152,7 +165,8 @@ class Board {
         column.addEventListener("click", () => this.handleClick(i));
       }
     }
-  }
+}
+
 
   /*  Display the board in document */
 
@@ -160,7 +174,7 @@ class Board {
     let content = '<div class="board">';
 
     // The board is displayed column by column with low indexes of
-    // rows on the bottom with the help of css flexbox see css class ".column"
+    // rows on the bottom using CSS flexbox see css class ".column"
 
     for (let i = 0; i < this.columns; i++) {
       let column = '<div class="column column' + i + '">';
@@ -188,6 +202,29 @@ class Board {
     return content;
   }
 
+  /* Display the user interface */
+
+  userInterface() {
+    let content = ` <div id="gameInfo">
+                      <p>Align <span id="winCount">4</span> of your color to win!</p>
+                    </div>
+                  
+                    <div id="playerTurn">
+                      <p>Turn: <span id="currentPlayer">Yellow</span></p>
+                    </div>
+                  
+                    <button id="undoButton">Undo Move</button>
+                  
+                    <button id="resetButton">Reset Game</button>
+                  
+                    <div id="soundControl">
+                      <input type="checkbox" id="soundCheck" checked>
+                      <label for="soundCheck">Sound On/Off</label>
+                    </div>
+                  `;
+    return content;
+  }
+
   /* HELPERS */
 
   /* Returns the index of the first empty row 
@@ -196,6 +233,7 @@ class Board {
   getEmptySlotIndex(column) {
     return column.indexOf(" ");
   }
+
   /* GETTERS */
 
   getPosition() {

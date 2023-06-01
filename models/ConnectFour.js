@@ -68,8 +68,10 @@ class ConnectFour {
     start(rows, columns, audio, mode, level) {
         let squareSize = Math.min(window.innerWidth / columns, window.innerHeight / rows) * 0.7;
         document.documentElement.style.setProperty("--square-size", `${squareSize}px`);
-        // Clear 'app' div
-        document.getElementById("app").innerHTML = '';
+        // Prepare 'app' div
+        document.getElementById("app").innerHTML = `<div id="gameControls"></div>
+                                                    <div id="gameBoard"></div>
+                                                    `;
     
         if (mode === '1') {
             this.board = new Board(rows, columns, audio, level);
@@ -80,8 +82,16 @@ class ConnectFour {
         this.render();
         this.board.addMouseOverEvents();
     }
-    /* Render the board in the DOM */
+
+    /* Render the game in the DOM */
+
     render() {
-        document.getElementById("app").innerHTML += this.board.toHTML();
-    }   
+        // Get the divs for user interface and game board
+        const userInterfaceDiv = document.getElementById("gameControls");
+        const boardDiv = document.getElementById("gameBoard");
+    
+        // Update the divs with the UI and board
+        userInterfaceDiv.innerHTML = this.board.userInterface();
+        boardDiv.innerHTML = this.board.toHTML();
+    }
 }
