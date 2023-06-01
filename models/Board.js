@@ -1,34 +1,18 @@
-// Handling of the game
-
+// Game display
 class Board {
-  rows;
-  columns;
-  position;
-  turn; // Y for Yellow player || R for Red player (used to know whose turn it is and token color placement)
-  winCondition;
   audio;
   moveSound;
+  level;
+  game;
+  turn;
 
-  constructor(rows, columns, audio = true, level = "0", turn = "Y") {
-    this.rows = rows;
-    this.columns = columns;
-    this.winCondition = this.setWinCondition(this.columns, this.rows);
-    this.position = [];
+  constructor(rows, columns, audio = true, level = "0") {
+    this.game = new Game(rows, columns); // Create an instance of the Game class
     this.audio = audio;
+    this.level = level;
     if (this.audio) {
       this.loadSound();
     }
-    this.level = level;
-
-    for (let i = 0; i < this.columns; i++) {
-      const column = [];
-      for (let j = 0; j < this.rows; j++) {
-        column.push(" ");
-      }
-      this.position.push(column);
-    }
-    this.turn = turn;
-    this.addMouseOverEvents();
   }
 
   loadSound() {
@@ -41,35 +25,18 @@ class Board {
   /* Try to play a move */
 
   playMove(colNum) {
-    // Get the selected column
-    const column = this.position[colNum];
-
-    // Find the first empty slot in the column
-    const emptySlotIndex = this.getEmptySlotIndex(column);
-    if (emptySlotIndex !== -1) {
-      // Place the token of the current player
-      column[emptySlotIndex] = this.turn;
-
-      // Check for a win condition
-      const winningSequence = this.checkWinCondition(colNum, emptySlotIndex);
+    this.turn = this.game.getTurn();
+    const lastTurn = this.game.playMove(colNum);
+    if (lastTurn) {
+      const winningSequence = this.game.checkWinCondition(lastTurn);
       if (winningSequence) {
-        console.log("Player " + this.turn + " wins !");
-        // Stop the game by redrawing the board without the eventlisteners
-        document.getElementById("gameBoard").innerHTML = this.toHTML();
+        console.log("Player " + lastTurn + " wins!");
 
-        // Add arrow to winning sequence
-        winningSequence.forEach(([x, y]) => {
-          let square = document.querySelector(
-            `.column${x} .square:nth-child(${y + 1})`
-          );
-          let div = document.createElement("div");
-          div.classList.add("cross");
-          square.appendChild(div);
-        });
+        // Stop the game by redrawing the board without the event listeners
+        document.getElementById("gameBoard").innerHTML = this.toHTML(winningSequence);
       } else {
-        // Switch the turn to the other player
-        this.turn = this.turn === "Y" ? "R" : "Y";
-        if (this.audio) {
+        this.turn = this.game.getTurn();
+        if (this.audio && this.moveSound) {
           this.moveSound.play().catch(function (error) {
             console.log("Error playing audio file");
           });
@@ -81,56 +48,9 @@ class Board {
     }
   }
 
-  /* Win condition */
-
-  checkWinCondition(colNum, rowNum) {
-    const directions = [
-      [-1, 0], // horizontal
-      [0, -1], // vertical
-      [-1, -1], // diagonal ↘
-      [-1, 1], // diagonal ↗
-    ];
-
-    for (let [dx, dy] of directions) {
-      let count = 0;
-      let winningSequence = [];
-      for (
-        let offset = -this.winCondition - 1;
-        offset <= this.winCondition + 1;
-        offset++
-      ) {
-        let nx = colNum + offset * dx;
-        let ny = rowNum + offset * dy;
-        if (
-          nx >= 0 &&
-          nx < this.columns &&
-          ny >= 0 &&
-          ny < this.rows &&
-          this.position[nx][ny] === this.turn
-        ) {
-          count++;
-          winningSequence.push([nx, ny]);
-          if (count === this.winCondition) {
-            return winningSequence; // return the winning sequence
-          }
-        } else {
-          count = 0;
-          winningSequence = []; // reset the sequence when the chain is broken
-        }
-      }
-    }
-    return false; // no winner
-  }
-
-  /* Set the number of aligned tokens to win the game */
-  setWinCondition(x, y) {
-    let win = Math.floor(Math.sqrt(x * y) - 2);
-    return win;
-  }
-
   /* Add mouse events to the board */
   handleMouseOver(column) {
-    const currentPlayer = this.getTurn();
+    const currentPlayer = this.game.getTurn();
     const upperSquare = column.getElementsByClassName("upperSquare")[0];
     if (currentPlayer === "Y") {
       upperSquare.innerHTML = '<div class="yellowSquare"></div>';
@@ -149,12 +69,13 @@ class Board {
   }
 
   addMouseOverEvents() {
+    const position = this.game.getPosition();
     const columns = document.getElementById("gameBoard").getElementsByClassName("column");
 
     for (let i = 0; i < columns.length; i++) {
       const column = columns[i];
       // Add events only if the column isn't full
-      if (this.getEmptySlotIndex(this.position[i]) !== -1) {
+      if (this.game.getEmptySlotIndex(position[i]) !== -1) {
         // Make the token appear when hovering a column
         column.addEventListener("mouseover", () =>
           this.handleMouseOver(column)
@@ -165,23 +86,27 @@ class Board {
         column.addEventListener("click", () => this.handleClick(i));
       }
     }
-}
+  }
 
 
   /*  Display the board in document */
 
-  toHTML() {
+  toHTML(winningSequence = null) {
     let content = '<div class="board">';
 
     // The board is displayed column by column with low indexes of
     // rows on the bottom using CSS flexbox see css class ".column"
-
-    for (let i = 0; i < this.columns; i++) {
+    const position = this.game.getPosition();
+    for (let i = 0; i < this.game.getColumns(); i++) {
       let column = '<div class="column column' + i + '">';
 
-      for (let j = 0; j < this.rows; j++) {
+      for (let j = 0; j < this.game.getRows(); j++) {
         column += '<div class="square">';
-        switch (this.position[i][j]) {
+        if (winningSequence && winningSequence.some(([x, y]) => x === i && y === j)) {
+          // This square is part of the winning sequence, add the cross
+          column += '<div class="cross"></div>';
+        }
+        switch (position[i][j]) {
           case "Y":
             column += '<div class="yellowSquare"></div>';
             break;
@@ -206,83 +131,33 @@ class Board {
 
   userInterface() {
     let content = ` <div id="gameInfo">
-                      <p>Align <span id="winCount">4</span> of your color to win!</p>
-                    </div>
-                  
-                    <div id="playerTurn">
-                      <p>Turn: <span id="currentPlayer">Yellow</span></p>
-                    </div>
-                  
-                    <button id="undoButton">Undo Move</button>
-                  
-                    <button id="resetButton">Reset Game</button>
-                  
-                    <div id="soundControl">
-                      <input type="checkbox" id="soundCheck" checked>
-                      <label for="soundCheck">Sound On/Off</label>
-                    </div>
-                  `;
+                            <p>Objectif <span id="winCount">${this.game.getWinCondition()}</span> à la suite !</p>
+                          </div>                      
+                          <button id="undoButton">Undo Move</button>
+                          <button id="resetButton">Reset Game</button>
+                          <div id="soundControl">
+                            <input type="checkbox" id="soundCheck" checked>
+                            <label for="soundCheck">Sound On/Off</label>
+                          </div>
+                        `;
     return content;
   }
 
-  /* HELPERS */
+  /* Handle undo move button */
 
-  /* Returns the index of the first empty row 
-  Returns -1 if the column is full */
+  undoMove() {
+    this.game.undoMove();
 
-  getEmptySlotIndex(column) {
-    return column.indexOf(" ");
+    // Update the board
+    document.getElementById("gameBoard").innerHTML = this.toHTML();
+    this.addMouseOverEvents();
   }
 
-  /* GETTERS */
-
-  getPosition() {
-    return this.position;
-  }
-
-  getRows() {
-    return this.rows;
-  }
-
-  getColumns() {
-    return this.columns;
-  }
-
-  getTurn() {
-    return this.turn;
-  }
-
-  /* DEBUG TOOLS */
-
-  /* Display the board in console */
-
-  toLog() {
-    console.log("Current Board Position log :");
-    for (let j = this.rows - 1; j >= 0; j--) {
-      // Display the higher indexes of rows first
-      let row = "";
-      for (let i = 0; i < this.columns; i++) {
-        row += this.position[i][j] || " ";
-        row += "\t";
-      }
-      console.log(row);
-    }
-  }
-
-  /* Create a random position */
-
-  testPosition() {
-    for (let i = 0; i < this.columns; i++) {
-      for (let j = 0; j < this.rows; j++) {
-        const rand = Math.random();
-        if (rand < 0.33) {
-          this.position[i][j] = "";
-        } else if (rand < 0.66) {
-          this.position[i][j] = "Y";
-        } else {
-          this.position[i][j] = "R";
-        }
-      }
+  /* Audio on/off */
+  toggleAudio() {
+    this.audio = !this.audio;
+    if (this.audio && !this.moveSound) {
+      this.loadSound();
     }
   }
 }

@@ -1,4 +1,4 @@
-// The game homepage where you can select options before starting the game
+// The game homepage where you can select options and initialization of the game
 
 class ConnectFour {
     constructor() {
@@ -40,12 +40,12 @@ class ConnectFour {
             </div>
             <button type="button" id="playButton">Jouer !</button>
         </form>`;
-    
+
         document.getElementById("app").innerHTML = formHTML;
-    
+
         const modeSelect = document.getElementById('mode');
         const levelContainer = document.getElementById('levelContainer');
-    
+
         modeSelect.addEventListener('change', () => {
             if (modeSelect.value === '1') {
                 levelContainer.style.display = 'block';
@@ -53,7 +53,7 @@ class ConnectFour {
                 levelContainer.style.display = 'none';
             }
         });
-    
+
         document.getElementById('playButton').addEventListener('click', () => {
             const rows = document.getElementById('row').value;
             const columns = document.getElementById('column').value;
@@ -63,7 +63,7 @@ class ConnectFour {
             this.start(rows, columns, audio, mode, level);
         });
     }
-    
+
     /* Initialize and launch the game */
     start(rows, columns, audio, mode, level) {
         let squareSize = Math.min(window.innerWidth / columns, window.innerHeight / rows) * 0.7;
@@ -72,13 +72,13 @@ class ConnectFour {
         document.getElementById("app").innerHTML = `<div id="gameControls"></div>
                                                     <div id="gameBoard"></div>
                                                     `;
-    
+
         if (mode === '1') {
             this.board = new Board(rows, columns, audio, level);
         } else {
             this.board = new Board(rows, columns, audio);
         }
-    
+
         this.render();
         this.board.addMouseOverEvents();
     }
@@ -89,9 +89,31 @@ class ConnectFour {
         // Get the divs for user interface and game board
         const userInterfaceDiv = document.getElementById("gameControls");
         const boardDiv = document.getElementById("gameBoard");
-    
+
         // Update the divs with the UI and board
         userInterfaceDiv.innerHTML = this.board.userInterface();
         boardDiv.innerHTML = this.board.toHTML();
+        // Add reset button functionality
+        const resetButton = document.getElementById("resetButton");
+        resetButton.addEventListener("click", () => {
+            // Reinitialize the game board with the same parameters
+            this.start(this.board.game.getRows(), this.board.game.getColumns(), this.board.audio, this.board.mode, this.board.level);
+        });
+
+        // Add undo button functionality
+        const undoButton = document.getElementById("undoButton");
+        undoButton.addEventListener("click", () => {
+            // Undo the last move
+            this.board.undoMove();
+        });
+
+        // Add sound toggle functionality
+        const soundCheckbox = document.getElementById("soundCheck");
+        // Set checkbox initial state to match game audio setting
+        soundCheckbox.checked = this.board.audio;
+        soundCheckbox.addEventListener("change", () => {
+            // Toggle the audio on/off
+            this.board.toggleAudio();
+        });
     }
 }
