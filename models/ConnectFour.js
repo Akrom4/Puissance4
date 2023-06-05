@@ -38,6 +38,13 @@ class ConnectFour {
                     <option value="4">Extrême !</option>
                 </select>
             </div>
+            <div id="colorContainer" style="display: none;">
+            <label for="color">Couleur</label>
+            <select id="color">
+                <option value="Y">Jaune</option>
+                <option value="R">Rouge</option>
+            </select>
+        </div>
             <button type="button" id="playButton">Jouer !</button>
         </form>`;
 
@@ -45,12 +52,16 @@ class ConnectFour {
 
         const modeSelect = document.getElementById('mode');
         const levelContainer = document.getElementById('levelContainer');
+        const colorContainer = document.getElementById('colorContainer');
+
 
         modeSelect.addEventListener('change', () => {
             if (modeSelect.value === '1') {
                 levelContainer.style.display = 'block';
+                colorContainer.style.display = 'block';
             } else {
                 levelContainer.style.display = 'none';
+                colorContainer.style.display = 'none';
             }
         });
 
@@ -60,12 +71,13 @@ class ConnectFour {
             const audio = document.getElementById('audio').checked;
             const mode = document.getElementById('mode').value;
             const level = document.getElementById('level').value;
-            this.start(rows, columns, audio, mode, level);
+            const color = document.getElementById('color').value;
+            this.start(rows, columns, audio, mode, level, color);
         });
     }
 
     /* Initialize and launch the game */
-    start(rows, columns, audio, mode, level) {
+    start(rows, columns, audio, mode, level, humanColor) {
         let squareSize = Math.min(window.innerWidth / columns, window.innerHeight / rows) * 0.7;
         document.documentElement.style.setProperty("--square-size", `${squareSize}px`);
         // Prepare 'app' div
@@ -74,7 +86,7 @@ class ConnectFour {
                                                     `;
 
         if (mode === '1') {
-            this.board = new Board(rows, columns, audio, level);
+            this.board = new Board(rows, columns, audio, level, humanColor);
         } else {
             this.board = new Board(rows, columns, audio);
         }

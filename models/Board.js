@@ -5,16 +5,36 @@ class Board {
   level;
   game;
   turn;
+  engine;
 
-  constructor(rows, columns, audio = true, level = "0") {
+  constructor(rows, columns, audio = true, level = null, humanColor = null) {
     this.game = new Game(rows, columns); // Create an instance of the Game class
     this.audio = audio;
     this.level = level;
     if (this.audio) {
       this.loadSound();
     }
+    if (level) {
+      this.engine = new Engine(this.game, this.level);
+    }
+    if (humanColor) {
+      this.humanColor = humanColor;
+    }
+    if (humanColor = "R") {
+      this.engineMove();
+    }
   }
 
+  /* Make the engine play a move  */
+  engineMove() {
+    // Check if it's the engine's turn
+    if (this.level && this.game.getTurn() !== this.humanColor) {
+      let engineMoveColumn = this.engine.makeDecision();
+      this.playMove(engineMoveColumn);
+    }
+  }
+
+  /* Handle audio */
   loadSound() {
     this.moveSound = new Audio("audio/move-sound.mp3");
     this.moveSound.onerror = function () {
@@ -26,7 +46,7 @@ class Board {
 
   playMove(colNum) {
     this.turn = this.game.getTurn();
-    const lastTurn = this.game.playMove(colNum);
+    const lastTurn = this.game.playMove(colNum); // Saves the move player color
     if (lastTurn) {
       const winningSequence = this.game.checkWinCondition(lastTurn);
       if (winningSequence) {
@@ -44,6 +64,9 @@ class Board {
         // Draw the board with new position
         document.getElementById("gameBoard").innerHTML = this.toHTML();
         this.addMouseOverEvents();
+
+        // Engine move
+        this.engineMove();
       }
     }
   }
@@ -146,8 +169,10 @@ class Board {
   /* Handle undo move button */
 
   undoMove() {
-    this.game.undoMove();
-
+    if(this.level){
+      this.game.undoMove();
+      this.game.undoMove();
+    }
     // Update the board
     document.getElementById("gameBoard").innerHTML = this.toHTML();
     this.addMouseOverEvents();
