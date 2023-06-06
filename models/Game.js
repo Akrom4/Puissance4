@@ -105,25 +105,33 @@ class Game {
   undoMove() {
     // Only attempt to undo if there has been at least one move
     if (this.moveHistory.length > 0) {
-      // Get the column of the last move
-      const lastMoveColumn = this.moveHistory[this.moveHistory.length - 1] - 1;
+        // Get the column of the last move
+        const lastMoveColumn = this.moveHistory[this.moveHistory.length - 1] - 1;
 
-      // Find the first non-empty slot in the column (from bottom to top)
-      const column = this.position[lastMoveColumn];
-      const filledSlotIndex = column.lastIndexOf(this.turn === "Y" ? "R" : "Y");
+        // Find the first non-empty slot in the column (from bottom to top)
+        const column = this.position[lastMoveColumn];
+        let filledSlotIndex = -1;
 
-      // If found, empty the slot
-      if (filledSlotIndex !== -1) {
-        column[filledSlotIndex] = " ";
-      }
+        for(let i = column.length - 1; i >= 0; i--) {
+            if(column[i] !== ' ') {
+                filledSlotIndex = i;
+                break;
+            }
+        }
 
-      // Remove the last move from the history
-      this.moveHistory.pop();
+        // If found, empty the slot
+        if (filledSlotIndex !== -1) {
+            column[filledSlotIndex] = " ";
+        }
 
-      // Switch the turn to the other player
-      this.switchTurn();
+        // Remove the last move from the history
+        this.moveHistory.pop();
+
+        // Switch the turn to the other player
+        this.switchTurn();
     }
-  }
+}
+
   /* Switch turn */
   switchTurn() {
     this.turn = this.turn === "Y" ? "R" : "Y";
@@ -134,13 +142,6 @@ class Game {
   getEmptySlotIndex(column) {
     return column.indexOf(" ");
   }
-// /* Deep clone */
-//   clone() {
-//     let clone = _.cloneDeep(this);
-//     return clone;
-// }
-
-
 
   /* GETTERS */
   getWinCondition() {
@@ -162,30 +163,30 @@ class Game {
   getTurn() {
     return this.turn;
   }
-
-  //   getValidColumns() {
-  //     let validColumns = [];
-  //     for (let i = 0; i < this.game.getColumns(); i++) {
-  //       if (this.game.getEmptySlotIndex(this.game.getPosition()[i]) !== -1) {
-  //         validColumns.push(i);
-  //       }
-  //     }
-  //     return validColumns;
-  //   }
+ 
 
   /* DEBUG TOOLS */
-  /* Display the board in console */
-  toLog() {
+/* Display the board in console */
+toLog() {
     console.log("Current Board Position log :");
     for (let j = this.rows - 1; j >= 0; j--) {
       let row = "";
+      row += j + " ";
       for (let i = 0; i < this.columns; i++) {
-        row += this.position[i][j] || " ";
+        switch (this.position[i][j]) {
+          case ' ':
+            row += '_'; break;
+          case 'Y':
+            row += 'Y'; break;
+          case 'R':
+            row += 'R'; break;
+        }
         row += "\t";
       }
       console.log(row);
     }
   }
+  
 
   /* Create a random position */
   testPosition() {

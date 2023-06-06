@@ -26,6 +26,7 @@ class Engine {
     }
     // For levels greater than 0, use Minimax algorithm
     else {
+
       let bestScore = -Infinity;
       let move;
 
@@ -53,18 +54,15 @@ class Engine {
     // Get the current player and opponent before simulating a move
     let currentPlayer = this.game.getTurn() === "Y" ? "R" : "Y";
 
-    // Clone the game
-    // let gameClone = this.game.clone();
-
     // If at terminal node or depth = 0, return heuristic value
     if (depth === 0 || this.game.checkWinCondition() !== null) {
-      return this.evaluate(this.game, currentPlayer);
+      const evaluation = this.evaluate(this.game, currentPlayer);
+      return evaluation;
     }
 
-    let columnOrder = this.middleFirstColumnOrder(this.game.getColumns());
     if (maximizingPlayer) {
       let maxEval = -Infinity;
-      for (let i of columnOrder) {
+      for (let i = 0; i < this.game.getColumns(); i++) {
         // Check if the column is not full
         if (this.game.getEmptySlotIndex(this.game.getPosition()[i]) !== -1) {
           // Make a move on the cloned game
@@ -83,7 +81,7 @@ class Engine {
       return maxEval;
     } else {
       let minEval = Infinity;
-      for (let i of columnOrder) {
+      for (let i = 0; i < this.game.getColumns(); i++) {
         // Check if the column is not full
         if (this.game.getEmptySlotIndex(this.game.getPosition()[i]) !== -1) {
           // Make a move on the cloned game
@@ -119,15 +117,14 @@ class Engine {
   }
 
   /* Heuristic evaluation function */
-evaluate(game, currentPlayer) {
-    console.log("Evaluation :");
-    
+  evaluate(game, currentPlayer) {
     let opponentPlayer = currentPlayer === "Y" ? "R" : "Y";
-    
-    // If the AI wins, return 1
+
+    // If the engine wins, return 1
     if (game.checkWinCondition(currentPlayer) !== null) {
-    //   console.log("Currentplayer", currentPlayer);
-    //   console.log("Position", game.position);
+      game.toLog();
+      console.log("IA win : ", game.checkWinCondition(currentPlayer));
+      console.log("Human win : ", game.checkWinCondition(opponentPlayer));
       if (currentPlayer == "R") {
         return 1;
       } else {
@@ -136,8 +133,10 @@ evaluate(game, currentPlayer) {
     }
     // If the opponent wins, return -1
     else if (game.checkWinCondition(opponentPlayer) !== null) {
-    //   console.log("OpponentPlayer", opponentPlayer);
-    //   console.log("Position", game.position);
+      game.toLog();
+      console.log("IA win : ", game.checkWinCondition(currentPlayer));
+      console.log("Human win : ", game.checkWinCondition(opponentPlayer));
+
       if (opponentPlayer == "R") {
         return -1;
       } else {
@@ -148,5 +147,5 @@ evaluate(game, currentPlayer) {
     else {
       return 0;
     }
-  }  
+  }
 }
