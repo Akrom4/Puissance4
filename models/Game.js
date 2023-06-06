@@ -48,9 +48,15 @@ class Game {
     /* Win condition */
 
     checkWinCondition(lastTurn) {
-        const lastMoveColumn = this.moveHistory[this.moveHistory.length - 1] -1; // Get the column of the last move
+        if (this.moveHistory.length === 0) {
+            return null; // no moves have been made yet
+        }
+        const lastMoveColumn = this.moveHistory[this.moveHistory.length - 1] - 1; // Get the column of the last move
+        if (lastMoveColumn < 0 || lastMoveColumn >= this.columns) {
+            return null; // invalid column index
+        }
         const lastMoveRow = this.position[lastMoveColumn].lastIndexOf(this.turn === "Y" ? "R" : "Y"); // Get the row index of the last move
-        
+
         // Check for a win condition
         const directions = [
             [-1, 0], // horizontal
@@ -87,7 +93,7 @@ class Game {
                 }
             }
         }
-        return false; // no winner
+        return null; // no winner
     }
 
     /* Set the number of aligned tokens to win the game */
@@ -122,14 +128,26 @@ class Game {
     switchTurn() {
         this.turn = this.turn === "Y" ? "R" : "Y";
     }
+
     /* Returns the index of the first empty row 
     Returns -1 if the column is full */
     getEmptySlotIndex(column) {
         return column.indexOf(" ");
     }
 
+    /* Create a deep clone */
+    clone() {
+        let clone = new Game(this.rows, this.columns);
+        clone.position = JSON.parse(JSON.stringify(this.position));
+        clone.moveHistory = [...this.moveHistory];
+        clone.turn = this.turn;
+        clone.winCondition = this.winCondition;
+        return clone;
+    }
+    
+
     /* GETTERS */
-    getWinCondition(){
+    getWinCondition() {
         return this.winCondition;
     }
 

@@ -31,11 +31,11 @@ class ConnectFour {
             <div id="levelContainer" style="display: none;">
                 <label for="level">Niveau</label>
                 <select id="level">
-                    <option value="0">Nul !</option>
-                    <option value="1">Facile</option>
-                    <option value="2">Moyen</option>
-                    <option value="3">Dur</option>
-                    <option value="4">Extrême !</option>
+                    <option value="1">Nul !</option>
+                    <option value="2">Facile</option>
+                    <option value="3">Moyen</option>
+                    <option value="4">Dur</option>
+                    <option value="5">Extrême !</option>
                 </select>
             </div>
             <div id="colorContainer" style="display: none;">
@@ -84,8 +84,9 @@ class ConnectFour {
         document.getElementById("app").innerHTML = `<div id="gameControls"></div>
                                                     <div id="gameBoard"></div>
                                                     `;
-
-        if (mode === '1') {
+        mode = parseInt(mode);
+        level = parseInt(level);
+        if (mode === 1) {
             this.board = new Board(rows, columns, audio, level, humanColor);
         } else {
             this.board = new Board(rows, columns, audio);
@@ -109,7 +110,7 @@ class ConnectFour {
         const resetButton = document.getElementById("resetButton");
         resetButton.addEventListener("click", () => {
             // Reinitialize the game board with the same parameters
-            this.start(this.board.game.getRows(), this.board.game.getColumns(), this.board.audio, this.board.mode, this.board.level);
+            this.start(this.board.game.getRows(), this.board.game.getColumns(), this.board.audio, this.board.mode, this.board.level, this.board.humanColor);
         });
 
         // Add undo button functionality

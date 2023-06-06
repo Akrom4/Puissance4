@@ -14,13 +14,13 @@ class Board {
     if (this.audio) {
       this.loadSound();
     }
-    if (level) {
+    if (this.level !== null) {
       this.engine = new Engine(this.game, this.level);
     }
     if (humanColor) {
       this.humanColor = humanColor;
     }
-    if (humanColor = "R") {
+    if (humanColor == "R") {
       this.engineMove();
     }
   }
@@ -169,8 +169,14 @@ class Board {
   /* Handle undo move button */
 
   undoMove() {
-    if(this.level){
+    // Check if there are at least two moves to undo
+    if (this.level && this.game.moveHistory.length >= 2) {
+      // Undo the last move of the player
       this.game.undoMove();
+      // Undo the last move of the engine
+      this.game.undoMove();
+    }
+    else {
       this.game.undoMove();
     }
     // Update the board
